@@ -105,23 +105,24 @@
     <h2>Your Notifications</h2>
 
     {% if notifications and notifications|length > 0 %}
-    {% for note in notifications %}
-    <li>🔔 
-      {% if 'Grade received' in note.message %}
-        📢 {{ note.message.split('for')[1].split(':')[0].strip() }} – Grade: {{ note.message.split(':')[1].strip() }}
-      {% elif 'Quiz submitted' in note.message %}
-        📢 {{ note.message.split('for')[1].split('with')[0].strip() }} – {{ note.message.split('with')[1].strip() }}
-      {% elif 'Project submitted' in note.message %}
-        📢 Project submitted for: {{ note.message.split('for')[1].strip() }}
-      {% elif 'Enrolled in' in note.message %}
-        📢 Enrolled in: {{ note.message.split('in')[1].strip() }}
-      {% else %}
-        {{ note.message }}
-      {% endif %}
-    </li>
-  {% endfor %}
-  
-      {% endfor %}
+      <ul>
+        {% for note in notifications %}
+          <li>🔔 
+            {% if 'Grade received' in note.message %}
+              📢 {{ note.message.split('for')[1].split(':')[0].strip() }} – Grade: {{ note.message.split(':')[1].strip() }}
+            {% elif 'Quiz submitted' in note.message %}
+              📢 {{ note.message.split('for')[1].split('with')[0].strip() }} – {{ note.message.split('with')[1].strip() }}
+            {% elif 'Project submitted' in note.message %}
+              📢 Project submitted for: {{ note.message.split('for')[1].strip() }}
+            {% elif 'Enrolled in' in note.message %}
+              📢 Enrolled in: {{ note.message.split('in')[1].strip() }}
+            {% else %}
+              {{ note.message }}
+            {% endif %}
+            <br><small style="color: gray;">🕒 {{ note.timestamp[:19].replace('T', ' ') if 'T' in note.timestamp else note.timestamp[:19] }}</small>
+          </li>
+        {% endfor %}
+      </ul>
     {% else %}
       <div class="empty-msg">No notifications found.</div>
     {% endif %}
@@ -132,4 +133,5 @@
   </footer>
 
 </body>
+
 </html>
