@@ -126,20 +126,25 @@
     <h2>Evaluate Student Projects</h2>
 
     {% if submissions %}
-      {% for submission in submissions %}
-        <div class="submission">
-          <form method="POST" action="{{ url_for('evaluate') }}">
-            <div class="submission-info">
-              <strong>{{ submission.student }}</strong> submitted
-              <em>{{ submission.filename }}</em> for <strong>{{ submission.course }}</strong>
-            </div>
-            <input type="hidden" name="student" value="{{ submission.student }}">
-            <input type="hidden" name="course" value="{{ submission.course }}">
-            <input type="text" name="grade" placeholder="Enter grade" required>
-            <button type="submit">Submit</button>
-          </form>
-        </div>
-      {% endfor %}
+    {% for submission in submissions %}
+    <div>
+      <p><strong>{{ submission.user_email }}</strong> submitted <strong>{{ submission.filename }}</strong> for <em>{{ submission.course_name }}</em></p>
+      <form method="POST">
+        <input type="hidden" name="student" value="{{ submission.user_email }}">
+        <input type="hidden" name="course" value="{{ submission.course_name }}">
+        <label for="grade">Grade:</label>
+        <select name="grade" required>
+          <option value="">--</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>F</option>
+        </select>
+        <button type="submit">Submit Grade</button>
+      </form>
+    </div>
+  {% endfor %}
+  }
     {% else %}
       <p style="text-align:center;">No project submissions found.</p>
     {% endif %}
