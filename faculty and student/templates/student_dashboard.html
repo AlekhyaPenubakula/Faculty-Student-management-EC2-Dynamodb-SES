@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    nav {
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: #90caf9;
+    }
+
+    .dashboard-header {
+      padding: 2rem;
+      background: linear-gradient(to right, #e3f2fd, #fff3e0);
+      text-align: center;
+    }
+
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      color: #1a237e;
+    }
+
+    .dashboard-header p {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      color: #1e88e5;
+      margin-bottom: 15px;
+    }
+
+    .card ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .card ul li {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .btn-group {
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-group a {
+      background-color: #1976d2;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-group a:hover {
+      background-color: #0d47a1;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">CloudClass</div>
+    <div class="nav-links">
+      <a href="{{ url_for('show_notifications') }}">Notifications</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Welcome Header -->
+  <section class="dashboard-header">
+    <h1>Welcome, {{ user['name'] }} 👋</h1>
+    <p>Your personalized learning space at CloudClass</p>
+  </section>
+
+  <!-- Dashboard Content -->
+  <section class="dashboard-grid">
+
+    <!-- Enrolled Courses -->
+    <div class="card">
+      <h3>My Courses</h3>
+      {% if courses %}
+        <ul>
+          {% for course in courses %}
+            <li>
+              📘 <strong>{{ course }}</strong>
+              <div class="btn-group">
+                <a href="{{ url_for('course_detail', course_name=course) }}">📄 View Materials</a>
+                <a href="{{ url_for('submit_project', course_name=course) }}">📤 Submit Project</a>
+                <a href="{{ url_for('quiz', course_name=course) }}">📝 Take Quiz</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>You have not enrolled in any courses yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Available Courses -->
+    <div class="card">
+      <h3>Available Courses</h3>
+      {% if available_courses %}
+        <ul>
+          {% for course in available_courses %}
+            {% if course not in courses %}
+              <li>
+                📚 <strong>{{ course }}</strong>
+                <div class="btn-group">
+                  <a href="{{ url_for('payment', course_name=course) }}">💳 Enroll Now</a>
+                </div>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No new courses available to enroll.</p>
+      {% endif %}
+    </div>
+
+    <!-- Quiz Records -->
+    <div class="card">
+      <h3>Quiz Results</h3>
+      {% if quizzes %}
+        <ul>
+          {% for quiz in quizzes %}
+            <li>📝 {{ quiz.course }}: {{ quiz.score }}/{{ quiz.total }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No quiz attempts found.</p>
+      {% endif %}
+    </div>
+
+    <!-- Evaluations -->
+    <div class="card">
+      <h3>Grades</h3>
+      {% if evaluations %}
+        <ul>
+          {% for eval in evaluations %}
+            <li>🎯 {{ eval.course }}: Grade {{ eval.grade }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No grades received yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+      <h3>Latest Notifications</h3>
+      {% if notifications %}
+        <ul>
+          {% for note in notifications[-3:] %}
+            <li>🔔 {{ note }}</li>
+          {% endfor %}
+        </ul>
+        <p style="margin-top: 10px;"><a href="{{ url_for('show_notifications') }}">View All</a></p>
+      {% else %}
+        <p>No notifications available.</p>
+      {% endif %}
+    </div>
+
+  </section>
+
+  <footer>
+    &copy; 2025 CloudClass | Keep Learning, Keep Growing.
+  </footer>
+
+</body>
+</html>

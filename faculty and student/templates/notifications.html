@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notifications | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    nav {
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #90caf9;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 100px auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a237e;
+      margin-bottom: 25px;
+    }
+
+    .notification {
+      background-color: #e3f2fd;
+      border-left: 5px solid #1e88e5;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .notification:last-child {
+      margin-bottom: 0;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #888;
+      font-size: 1.1rem;
+      margin-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">CloudClass</div>
+    <div class="nav-links">
+      {% if user['role'] == 'student' %}
+        <a href="{{ url_for('student_dashboard') }}">Dashboard</a>
+      {% elif user['role'] == 'faculty' %}
+        <a href="{{ url_for('faculty_dashboard') }}">Dashboard</a>
+      {% endif %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Notifications Container -->
+  <div class="container">
+    <h2>Your Notifications</h2>
+
+    {% if notifications and notifications|length > 0 %}
+      {% for note in notifications %}
+        <div class="notification">
+          {{ note }}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-msg">No notifications found.</div>
+    {% endif %}
+  </div>
+
+  <footer>
+    &copy; 2025 CloudClass | Stay Informed, Stay Ahead.
+  </footer>
+
+</body>
+</html>

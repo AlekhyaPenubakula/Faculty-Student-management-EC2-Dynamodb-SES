@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Take Quiz | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: #90caf9;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a237e;
+      margin-bottom: 20px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question h4 {
+      margin-bottom: 10px;
+    }
+
+    .question label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .question input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    button {
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: block;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    .result-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .retry-btn {
+      padding: 10px 25px;
+      font-size: 1rem;
+      background: #43a047;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .retry-btn:hover {
+      background-color: #388e3c;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">CloudClass</div>
+    <div class="nav-links">
+      <a href="/student/dashboard">Dashboard</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Quiz Form -->
+  <div class="container">
+    <h2>General Quiz – <span id="courseNameDisplay"></span></h2>
+    <form id="quizForm" method="POST">
+      <input type="hidden" name="score" id="scoreField" value="0" />
+      <button type="submit">Submit Quiz</button>
+    </form>
+  </div>
+
+  <footer>
+    &copy; 2025 CloudClass | Learn & Grow.
+  </footer>
+
+  <script>
+    const courseName = decodeURIComponent(window.location.pathname.split('/').pop().replace(/%20/g, " "));
+    document.getElementById("courseNameDisplay").innerText = courseName;
+
+    const quizData = [
+      { question: "What is the capital of France?", options: ["Paris", "Berlin", "Madrid", "Rome"], answer: "Paris" },
+      { question: "Which planet is known as the Red Planet?", options: ["Mars", "Venus", "Jupiter", "Saturn"], answer: "Mars" },
+      { question: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Wordsworth", "Keats", "Tagore"], answer: "Shakespeare" },
+      { question: "What is the largest ocean?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: "Pacific" },
+      { question: "Which is the smallest prime number?", options: ["1", "2", "3", "0"], answer: "2" },
+      { question: "What gas do plants absorb?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], answer: "Carbon Dioxide" },
+      { question: "How many continents are there?", options: ["5", "6", "7", "8"], answer: "7" },
+      { question: "Which country gifted the Statue of Liberty?", options: ["UK", "Germany", "France", "Spain"], answer: "France" },
+      { question: "What is H2O commonly known as?", options: ["Oxygen", "Salt", "Hydrogen", "Water"], answer: "Water" },
+      { question: "Which animal is called the King of the Jungle?", options: ["Tiger", "Elephant", "Lion", "Bear"], answer: "Lion" }
+    ];
+
+    const form = document.getElementById("quizForm");
+
+    quizData.forEach((q, i) => {
+      const block = document.createElement("div");
+      block.className = "question";
+      block.innerHTML = `<h4>Q${i + 1}. ${q.question}</h4>` +
+        q.options.map(opt => `
+          <label>
+            <input type="radio" name="q${i}" value="${opt}" required> ${opt}
+          </label>
+        `).join('');
+      form.insertBefore(block, document.getElementById("scoreField"));
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      let score = 0;
+      quizData.forEach((q, i) => {
+        const selected = form.querySelector(`input[name="q${i}"]:checked`);
+        const radios = form.querySelectorAll(`input[name="q${i}"]`);
+        radios.forEach(radio => {
+          radio.disabled = true;
+          if (radio.value === q.answer) {
+            radio.parentElement.style.color = "green";
+            radio.parentElement.style.fontWeight = "bold";
+          }
+          if (selected && radio === selected && radio.value !== q.answer) {
+            radio.parentElement.style.color = "red";
+          }
+        });
+        if (selected && selected.value === q.answer) {
+          score++;
+        }
+      });
+
+      document.getElementById("scoreField").value = score;
+
+      // Prevent multiple submissions
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Submitted ✅";
+      }
+
+      // Show result + retry
+      const resultBox = document.createElement("div");
+      resultBox.className = "result-box";
+      resultBox.innerHTML = `
+        <h3 style="color: green;">✅ You scored ${score}/10</h3>
+        <button class="retry-btn" onclick="location.reload()">Retry Quiz</button>
+      `;
+      form.appendChild(resultBox);
+
+      // Send to backend
+      setTimeout(() => {
+        form.submit();
+      }, 1500);
+    });
+  </script>
+
+</body>
+</html>

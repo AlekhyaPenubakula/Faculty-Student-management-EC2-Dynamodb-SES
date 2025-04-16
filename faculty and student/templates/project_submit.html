@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Project | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    nav {
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #90caf9;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 100px auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a237e;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    input[readonly] {
+      background-color: #f0f0f0;
+      cursor: not-allowed;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">CloudClass</div>
+    <div class="nav-links">
+      <a href="{{ url_for('student_dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Form Container -->
+  <div class="container">
+    <h2>Submit Project for {{ course_name }}</h2>
+    <form method="POST" action="{{ url_for('submit_project', course_name=course_name) }}">
+      <label for="filename">Project File Name / Link</label>
+      <input type="text" id="filename" name="filename" placeholder="e.g. Final_Report.pdf or Google Drive link" required>
+
+      <button type="submit">Submit Project</button>
+    </form>
+  </div>
+
+  <footer>
+    &copy; 2025 CloudClass | Your success, our priority.
+  </footer>
+
+</body>
+</html>

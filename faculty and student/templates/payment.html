@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Purchase Course | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1a237e;
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      background: white;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      color: #1a237e;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 1.2rem;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .readonly-field {
+      background-color: #e8f0fe;
+      font-weight: bold;
+    }
+
+    .btn {
+      margin-top: 1.5rem;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #1565c0;
+    }
+
+    .success-message {
+      margin-top: 1.5rem;
+      color: green;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Enroll in {{ course_name }}</h1>
+  </header>
+
+  <div class="container">
+    <h2>Payment Details</h2>
+   
+
+    <form method="POST">
+      <label for="course">Course Name</label>
+      <input type="text" id="course" name="course" value="{{ course_name }}" readonly class="readonly-field" />
+
+      <label for="name">Cardholder Name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="cardnumber">Card Number</label>
+      <input type="text" id="cardnumber" name="cardnumber" maxlength="16" required>
+
+      <label for="expiry">Expiry Date</label>
+      <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+
+      <label for="cvv">CVV</label>
+      <input type="number" id="cvv" name="cvv" maxlength="3" required>
+
+      <button class="btn" type="submit">Pay Now</button>
+    </form>
+    <p style="text-align: center; margin-bottom: 1rem;">
+      🔙 <a href="{{ url_for('student_dashboard') }}" style="color: #1e88e5; text-decoration: none; font-weight: bold;">Back to Dashboard</a>
+    </p>
+    
+
+    {% if success %}
+      <div class="success-message">
+        ✅ Payment successful! You are now enrolled.
+      </div>
+    {% endif %}
+  </div>
+
+  <footer>
+    &copy; 2025 CloudClass | Empowering Learners.
+  </footer>
+
+</body>
+</html>

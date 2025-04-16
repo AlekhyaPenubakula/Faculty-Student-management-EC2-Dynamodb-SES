@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Faculty Dashboard | CloudClass</title>
+  <link rel="icon" href="/static/favicon.png" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    nav {
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #90caf9;
+    }
+
+    .dashboard-header {
+      padding: 2rem;
+      background: linear-gradient(to right, #fff3e0, #e3f2fd);
+      text-align: center;
+    }
+
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      color: #1a237e;
+    }
+
+    .dashboard-header p {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      color: #1e88e5;
+      margin-bottom: 10px;
+    }
+
+    .card p, .card ul {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .card ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #1a237e;
+      color: white;
+      padding: 1rem;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">CloudClass</div>
+    <div class="nav-links">
+      <a href="{{ url_for('upload_content') }}">Upload Material</a>
+      <a href="{{ url_for('evaluate') }}">Evaluate Projects</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <section class="dashboard-header">
+    <h1>Welcome, {{ user['name'] }} 👩‍🏫</h1>
+    <p>Here’s your personalized faculty dashboard. Upload content, evaluate projects, and manage your course interactions in one place.</p>
+  </section>
+
+  <!-- Grid Cards -->
+  <section class="dashboard-grid">
+
+    <!-- Project Submissions -->
+    <div class="card">
+      <h3>Project Submissions</h3>
+      {% if submissions %}
+        <ul>
+          {% for submission in submissions %}
+            <li>{{ submission.student }} submitted <strong>{{ submission.filename }}</strong> for <em>{{ submission.course }}</em></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No submissions yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Evaluations -->
+    <div class="card">
+      <h3>Evaluations Done</h3>
+      {% if evaluations %}
+        <ul>
+          {% for eval in evaluations %}
+            <li>{{ eval.student }} — {{ eval.course }}: Grade <strong>{{ eval.grade }}</strong></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No evaluations submitted.</p>
+      {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <h3>Quick Actions</h3>
+      <p>
+        ➕ <a href="{{ url_for('upload_content') }}">Upload Course Material</a><br>
+        📝 <a href="{{ url_for('evaluate') }}">Evaluate Student Projects</a>
+      </p>
+    </div>
+
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 CloudClass. Supporting Excellence in Teaching.
+  </footer>
+
+</body>
+</html>
