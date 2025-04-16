@@ -258,20 +258,24 @@ def evaluate():
             'activity_type_id': f'grade#{course}',
             'course_name': course,
             'grade': grade,
-            'timestamp': str(datetime.now(timezone.utc)
-)
+            'timestamp': str(datetime.now(datetime.UTC))
         })
+
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Grade received for {course}: {grade}",
-            'timestamp': str(datetime.now(timezone.utc)
-)
+            'timestamp': str(datetime.now(datetime.UTC))
         })
 
         return redirect(url_for('faculty_dashboard'))
 
-    return render_template('evaluate.html', submissions=[])  # can pull from 'project#' activities
+    # 👉 Pull all submitted projects by scanning the table (since partition key = student)
+    all_items = activities_table.scan().get('Items', [])
+    project_submissions = [i for i in all_items if i['activity_type_id'].startswith('project#')]
+
+    return render_template('evaluate.html', submissions=project_submissions)
+
 
 
 if __name__ == '__main__':
