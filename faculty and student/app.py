@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import boto3
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 # === AWS Setup ===
 dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')
@@ -144,13 +144,15 @@ def payment(course_name):
             'user_email': user['email'],
             'activity_type_id': f'enroll#{course_name}',
             'course_name': course_name,
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         activities_table.put_item(Item={
             'user_email': user['email'],
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Enrolled in {course_name}",
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         return render_template('payment.html', course_name=course_name, success=True)
     return render_template('payment.html', course_name=course_name)
@@ -170,17 +172,31 @@ def submit_project(course_name):
             'activity_type_id': f'project#{course_name}',
             'course_name': course_name,
             'filename': filename,
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         activities_table.put_item(Item={
             'user_email': user['email'],
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Project submitted for {course_name}",
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         return redirect(url_for('student_dashboard'))
     return render_template('project_submit.html', course_name=course_name)
 
+
+@app.route('/course/<course_name>')
+def course_detail(course_name):
+    user = session.get('user')
+    if not user:
+        return redirect(url_for('login'))
+
+    response = courses_table.get_item(Key={'course_name': course_name})
+    course = response.get('Item', {})
+    materials = course.get('material_links', [])
+
+    return render_template('course_detail.html', course_name=course_name, materials=materials, user=user)
 
 # === Quiz Attempt ===
 @app.route('/quiz/<course_name>', methods=['GET', 'POST'])
@@ -197,13 +213,15 @@ def quiz(course_name):
             'course_name': course_name,
             'score': score,
             'total': 10,
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         activities_table.put_item(Item={
             'user_email': user['email'],
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Quiz submitted for {course_name} with score {score}/10",
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         return redirect(url_for('student_dashboard'))
     return render_template('quiz.html', course_name=course_name)
@@ -240,13 +258,15 @@ def evaluate():
             'activity_type_id': f'grade#{course}',
             'course_name': course,
             'grade': grade,
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Grade received for {course}: {grade}",
-            'timestamp': str(datetime.utcnow())
+            'timestamp': str(datetime.now(timezone.utc)
+)
         })
 
         return redirect(url_for('faculty_dashboard'))
