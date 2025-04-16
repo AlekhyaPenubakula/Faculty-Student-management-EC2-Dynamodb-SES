@@ -203,13 +203,14 @@
       {% if evaluations %}
         <ul>
           {% for eval in evaluations %}
-            <li>🎯 {{ eval.course }} – Grade {{ eval.grade }}</li>
+            <li>🎯 {{ eval.course_name }} – Grade {{ eval.grade }}</li>
           {% endfor %}
         </ul>
       {% else %}
         <p>No grades received yet.</p>
       {% endif %}
     </div>
+    
     
 
     <!-- Notifications -->
