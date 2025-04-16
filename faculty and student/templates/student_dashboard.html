@@ -188,13 +188,14 @@
       {% if quizzes %}
         <ul>
           {% for quiz in quizzes %}
-            <li>📝 {{ quiz.course }}: {{ quiz.score }}/{{ quiz.total }}</li>
+            <li>📝 {{ quiz.course_name }} – {{ quiz.score }}/{{ quiz.total }}</li>
           {% endfor %}
         </ul>
       {% else %}
         <p>No quiz attempts found.</p>
       {% endif %}
     </div>
+    
 
     <!-- Evaluations -->
     <div class="card">
@@ -202,13 +203,14 @@
       {% if evaluations %}
         <ul>
           {% for eval in evaluations %}
-            <li>🎯 {{ eval.course }}: Grade {{ eval.grade }}</li>
+            <li>🎯 {{ eval.course }} – Grade {{ eval.grade }}</li>
           {% endfor %}
         </ul>
       {% else %}
         <p>No grades received yet.</p>
       {% endif %}
     </div>
+    
 
     <!-- Notifications -->
     <div class="card">
