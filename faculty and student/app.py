@@ -101,29 +101,36 @@ def student_dashboard():
 @app.route('/faculty/dashboard')
 def faculty_dashboard():
     if 'user' in session and session['user']['role'] == 'faculty':
-        # Fetch all activity records from the Activities table
         all_items = activities_table.scan().get('Items', [])
 
-        # Filter for project submissions
+        # Submissions
         project_submissions = [
-            item for item in all_items
+            {
+                'student': item['user_email'],
+                'filename': item.get('filename', 'N/A'),
+                'course': item.get('course_name', 'N/A')
+            }
+            for item in all_items
             if item.get('activity_type_id', '').startswith('project#')
         ]
 
-        # Filter for submitted evaluations
+        # Evaluations
         evaluations_done = [
-            item for item in all_items
+            {
+                'student': item['user_email'],
+                'grade': item.get('grade', ''),
+                'course': item.get('course_name', '')
+            }
+            for item in all_items
             if item.get('activity_type_id', '').startswith('grade#')
         ]
 
-        return render_template(
-            'faculty_dashboard.html',
-            user=session['user'],
-            submissions=project_submissions,
-            evaluations=evaluations_done
-        )
-
+        return render_template('faculty_dashboard.html',
+                               user=session['user'],
+                               submissions=project_submissions,
+                               evaluations=evaluations_done)
     return redirect(url_for('login'))
+
 
 
 
@@ -273,19 +280,34 @@ def evaluate():
     # Fetch all activity records
     all_items = activities_table.scan().get('Items', [])
 
-    # Track which submissions are already graded
+    # Track graded (student, course) pairs
     graded_keys = {
         (item['user_email'], item['course_name'])
         for item in all_items
         if item.get('activity_type_id', '').startswith('grade#')
     }
 
+    # Filter ungraded project submissions
+    submissions = [
+        item for item in all_items
+        if item.get('activity_type_id', '').startswith('project#')
+        and (item['user_email'], item['course_name']) not in graded_keys
+    ]
+
+    # Handle grade submission or edit
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
 
-        # Save the grade
+        # Remove old grade if already exists
+        all_items = [i for i in all_items if not (
+            i.get('activity_type_id', '').startswith('grade#')
+            and i.get('user_email') == student
+            and i.get('course_name') == course
+        )]
+
+        # Add new/updated grade
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
@@ -293,8 +315,6 @@ def evaluate():
             'grade': grade,
             'timestamp': str(datetime.now(timezone.utc))
         })
-
-        # Add a notification
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
@@ -302,23 +322,9 @@ def evaluate():
             'timestamp': str(datetime.now(timezone.utc))
         })
 
-        # Reload items to avoid redirect
-        all_items = activities_table.scan().get('Items', [])
-        graded_keys = {
-            (item['user_email'], item['course_name'])
-            for item in all_items
-            if item.get('activity_type_id', '').startswith('grade#')
-        }
+        return redirect(url_for('evaluate'))
 
-    # Show only ungraded submissions
-    project_submissions = [
-        item for item in all_items
-        if item.get('activity_type_id', '').startswith('project#') and
-        (item['user_email'], item['course_name']) not in graded_keys
-    ]
-
-    return render_template('evaluate.html', submissions=project_submissions)
-
+    return render_template('evaluate.html', submissions=submissions)
 
 
 if __name__ == '__main__':
