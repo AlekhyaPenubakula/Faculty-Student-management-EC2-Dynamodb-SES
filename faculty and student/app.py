@@ -98,12 +98,34 @@ def student_dashboard():
                            notifications=notes, available_courses=available_courses)
 
 
-# === Faculty Dashboard ===
 @app.route('/faculty/dashboard')
 def faculty_dashboard():
     if 'user' in session and session['user']['role'] == 'faculty':
-        return render_template('faculty_dashboard.html', user=session['user'])
+        # Fetch all activity records from the Activities table
+        all_items = activities_table.scan().get('Items', [])
+
+        # Filter for project submissions
+        project_submissions = [
+            item for item in all_items
+            if item.get('activity_type_id', '').startswith('project#')
+        ]
+
+        # Filter for submitted evaluations
+        evaluations_done = [
+            item for item in all_items
+            if item.get('activity_type_id', '').startswith('grade#')
+        ]
+
+        return render_template(
+            'faculty_dashboard.html',
+            user=session['user'],
+            submissions=project_submissions,
+            evaluations=evaluations_done
+        )
+
     return redirect(url_for('login'))
+
+
 
 
 # === Upload Course Content ===
@@ -248,11 +270,22 @@ def evaluate():
     if 'user' not in session or session['user']['role'] != 'faculty':
         return redirect(url_for('login'))
 
+    # Fetch all activity records
+    all_items = activities_table.scan().get('Items', [])
+
+    # Track which submissions are already graded
+    graded_keys = {
+        (item['user_email'], item['course_name'])
+        for item in all_items
+        if item.get('activity_type_id', '').startswith('grade#')
+    }
+
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
 
+        # Save the grade
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
@@ -261,6 +294,7 @@ def evaluate():
             'timestamp': str(datetime.now(timezone.utc))
         })
 
+        # Add a notification
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
@@ -268,11 +302,20 @@ def evaluate():
             'timestamp': str(datetime.now(timezone.utc))
         })
 
-        return redirect(url_for('faculty_dashboard'))
+        # Reload items to avoid redirect
+        all_items = activities_table.scan().get('Items', [])
+        graded_keys = {
+            (item['user_email'], item['course_name'])
+            for item in all_items
+            if item.get('activity_type_id', '').startswith('grade#')
+        }
 
-    # Pull submitted projects
-    all_items = activities_table.scan().get('Items', [])
-    project_submissions = [i for i in all_items if i['activity_type_id'].startswith('project#')]
+    # Show only ungraded submissions
+    project_submissions = [
+        item for item in all_items
+        if item.get('activity_type_id', '').startswith('project#') and
+        (item['user_email'], item['course_name']) not in graded_keys
+    ]
 
     return render_template('evaluate.html', submissions=project_submissions)
 
