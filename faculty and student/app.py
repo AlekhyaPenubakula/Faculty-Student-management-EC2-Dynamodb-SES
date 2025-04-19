@@ -277,45 +277,44 @@ def evaluate():
     if 'user' not in session or session['user']['role'] != 'faculty':
         return redirect(url_for('login'))
 
-    # Fetch all activity records from DynamoDB
     all_items = activities_table.scan().get('Items', [])
 
-    # Identify submissions that have already been graded
     graded_keys = {
-        (item['user_email'], item['course_name'])
+        (item.get('user_email', ''), item.get('course_name', ''))
         for item in all_items
         if item.get('activity_type_id', '').startswith('grade#')
     }
 
-    # Get only project submissions that are not yet graded
     ungraded_submissions = [
-        item for item in all_items
+        {
+            'user_email': item.get('user_email'),
+            'course_name': item.get('course_name'),
+            'filename': item.get('filename')
+        }
+        for item in all_items
         if item.get('activity_type_id', '').startswith('project#') and
-           (item['user_email'], item['course_name']) not in graded_keys
+           (item.get('user_email', ''), item.get('course_name', '')) not in graded_keys
     ]
 
-    # Handle form submission to grade a project
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
-        now = str(datetime.now(timezone.utc))
+        timestamp = str(datetime.now(timezone.utc))
 
-        # Save grade
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
             'course_name': course,
             'grade': grade,
-            'timestamp': now
+            'timestamp': timestamp
         })
 
-        # Send notification
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Grade received for {course}: {grade}",
-            'timestamp': now
+            'timestamp': timestamp
         })
 
         return redirect(url_for('evaluate'))
