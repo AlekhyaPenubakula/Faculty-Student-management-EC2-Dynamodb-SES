@@ -277,37 +277,35 @@ def evaluate():
     if 'user' not in session or session['user']['role'] != 'faculty':
         return redirect(url_for('login'))
 
-    # Fetch all activity records
+    # Fetch all activity records from the Activities table
     all_items = activities_table.scan().get('Items', [])
 
-    # Track graded (student, course) pairs
+    # Track which submissions are already graded
     graded_keys = {
-        (item['user_email'], item['course_name'])
+        (item['user_email'], item.get('course_name'))
         for item in all_items
         if item.get('activity_type_id', '').startswith('grade#')
     }
 
-    # Filter ungraded project submissions
-    submissions = [
-        item for item in all_items
-        if item.get('activity_type_id', '').startswith('project#')
-        and (item['user_email'], item['course_name']) not in graded_keys
+    # Get only ungraded project submissions
+    project_submissions = [
+        {
+            'user_email': item['user_email'],
+            'course_name': item.get('course_name', 'N/A'),
+            'filename': item.get('filename', 'N/A')
+        }
+        for item in all_items
+        if item.get('activity_type_id', '').startswith('project#') and
+           (item['user_email'], item.get('course_name')) not in graded_keys
     ]
 
-    # Handle grade submission or edit
+    # If form is submitted
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
 
-        # Remove old grade if already exists
-        all_items = [i for i in all_items if not (
-            i.get('activity_type_id', '').startswith('grade#')
-            and i.get('user_email') == student
-            and i.get('course_name') == course
-        )]
-
-        # Add new/updated grade
+        # Save grade to activities
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
@@ -315,6 +313,8 @@ def evaluate():
             'grade': grade,
             'timestamp': str(datetime.now(timezone.utc))
         })
+
+        # Add a notification
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
@@ -322,9 +322,9 @@ def evaluate():
             'timestamp': str(datetime.now(timezone.utc))
         })
 
-        return redirect(url_for('evaluate'))
+        return redirect(url_for('evaluate'))  # Stay on same page
 
-    return render_template('evaluate.html', submissions=submissions)
+    return render_template('evaluate.html', submissions=project_submissions)
 
 
 if __name__ == '__main__':
