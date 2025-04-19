@@ -195,24 +195,28 @@ def submit_project(course_name):
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        filename = request.form['filename']
+        filename = request.form['filename'].strip()
+        now = str(datetime.now(timezone.utc))
+
         activities_table.put_item(Item={
             'user_email': user['email'],
             'activity_type_id': f'project#{course_name}',
             'course_name': course_name,
             'filename': filename,
-            'timestamp': str(datetime.now(timezone.utc)
-)
+            'timestamp': now
         })
+
         activities_table.put_item(Item={
             'user_email': user['email'],
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Project submitted for {course_name}",
-            'timestamp': str(datetime.now(timezone.utc)
-)
+            'timestamp': now
         })
+
         return redirect(url_for('student_dashboard'))
+
     return render_template('project_submit.html', course_name=course_name)
+
 
 
 @app.route('/course/<course_name>')
@@ -279,42 +283,43 @@ def evaluate():
 
     all_items = activities_table.scan().get('Items', [])
 
-    graded_keys = {
-        (item.get('user_email', ''), item.get('course_name', ''))
-        for item in all_items
-        if item.get('activity_type_id', '').startswith('grade#')
-    }
+    graded_set = {
+    (item['user_email'], item.get('course_name'))
+    for item in all_items
+    if item.get('activity_type_id', '').startswith('grade#')
+}
 
     ungraded_submissions = [
-        {
-            'user_email': item.get('user_email'),
-            'course_name': item.get('course_name'),
-            'filename': item.get('filename')
-        }
-        for item in all_items
-        if item.get('activity_type_id', '').startswith('project#') and
-           (item.get('user_email', ''), item.get('course_name', '')) not in graded_keys
+    {
+        'user_email': item['user_email'],
+        'course_name': item.get('course_name', ''),
+        'filename': item.get('filename', '')
+    }
+    for item in all_items
+    if item.get('activity_type_id', '').startswith('project#')
+    and item.get('filename')  # Ensure filename exists
+    and (item['user_email'], item.get('course_name')) not in graded_set
     ]
 
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
-        timestamp = str(datetime.now(timezone.utc))
+        now = str(datetime.now(timezone.utc))
 
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
             'course_name': course,
             'grade': grade,
-            'timestamp': timestamp
+            'timestamp': now
         })
 
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Grade received for {course}: {grade}",
-            'timestamp': timestamp
+            'timestamp': now
         })
 
         return redirect(url_for('evaluate'))
