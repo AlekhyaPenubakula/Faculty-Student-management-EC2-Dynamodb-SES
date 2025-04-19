@@ -41,8 +41,8 @@
     }
 
     .container {
-      max-width: 800px;
-      margin: 100px auto;
+      max-width: 850px;
+      margin: 80px auto;
       background: white;
       padding: 2rem;
       border-radius: 12px;
@@ -56,32 +56,25 @@
     }
 
     .submission {
-      border-bottom: 1px solid #ddd;
-      padding: 15px 0;
-    }
-
-    .submission:last-child {
-      border-bottom: none;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
     }
 
     form {
+      margin-top: 10px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      justify-content: space-between;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    .submission-info {
-      flex: 2;
-    }
-
-    input[type="text"] {
+    select {
       padding: 10px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 1rem;
-      flex: 1;
     }
 
     button {
@@ -110,6 +103,7 @@
   </style>
 </head>
 <body>
+
   <!-- Navbar -->
   <nav>
     <div class="nav-logo">CloudClass</div>
@@ -120,17 +114,19 @@
     </div>
   </nav>
 
-  <!-- Evaluation Container -->
+  <!-- Evaluation Section -->
   <div class="container">
     <h2>Evaluate Student Projects</h2>
 
     {% if submissions %}
       {% for submission in submissions %}
-        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 10px;">
-          <p><strong>{{ submission.user_email }}</strong> submitted 
-            <strong><a href="#">{{ submission.filename }}</a></strong> 
+        <div class="submission">
+          <p>
+            👩‍🎓 <strong>{{ submission.user_email }}</strong> submitted
+            📁 <strong>{{ submission.filename }}</strong> 
             for <em>{{ submission.course_name }}</em>
           </p>
+
           <form method="POST">
             <input type="hidden" name="student" value="{{ submission.user_email }}">
             <input type="hidden" name="course" value="{{ submission.course_name }}">
@@ -154,6 +150,6 @@
   <footer>
     &copy; 2025 CloudClass. Grading made simple.
   </footer>
-</body>
 
+</body>
 </html>
