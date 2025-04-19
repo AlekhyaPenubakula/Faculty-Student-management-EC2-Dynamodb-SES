@@ -6,12 +6,11 @@
   <title>Evaluate Projects | CloudClass</title>
   <link rel="icon" href="/static/favicon.png" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f5f7fa;
       color: #333;
+      margin: 0;
     }
 
     nav {
@@ -33,15 +32,10 @@
       margin-left: 1.5rem;
       text-decoration: none;
       font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    .nav-links a:hover {
-      color: #90caf9;
     }
 
     .container {
-      max-width: 850px;
+      max-width: 900px;
       margin: 80px auto;
       background: white;
       padding: 2rem;
@@ -58,23 +52,23 @@
     .submission {
       margin-bottom: 20px;
       padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background-color: #fafafa;
+      border: 1px solid #ccc;
+      border-radius: 10px;
     }
 
     form {
-      margin-top: 10px;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      justify-content: space-between;
       flex-wrap: wrap;
+      gap: 1rem;
     }
 
     select {
-      padding: 10px;
+      padding: 8px;
       border-radius: 6px;
       border: 1px solid #ccc;
+      font-size: 1rem;
     }
 
     button {
@@ -86,11 +80,6 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #2e7d32;
     }
 
     footer {
@@ -104,7 +93,6 @@
 </head>
 <body>
 
-  <!-- Navbar -->
   <nav>
     <div class="nav-logo">CloudClass</div>
     <div class="nav-links">
@@ -114,7 +102,6 @@
     </div>
   </nav>
 
-  <!-- Evaluation Section -->
   <div class="container">
     <h2>Evaluate Student Projects</h2>
 
@@ -122,14 +109,13 @@
       {% for submission in submissions %}
         <div class="submission">
           <p>
-            👩‍🎓 <strong>{{ submission.user_email }}</strong> submitted
-            📁 <strong>{{ submission.filename }}</strong> 
-            for <em>{{ submission.course_name }}</em>
+            👩‍🎓 <strong>{{ submission['user_email'] }}</strong> submitted 
+            📁 <strong>{{ submission['filename'] }}</strong> 
+            for <em>{{ submission['course_name'] }}</em>
           </p>
-
           <form method="POST">
-            <input type="hidden" name="student" value="{{ submission.user_email }}">
-            <input type="hidden" name="course" value="{{ submission.course_name }}">
+            <input type="hidden" name="student" value="{{ submission['user_email'] }}">
+            <input type="hidden" name="course" value="{{ submission['course_name'] }}">
             <label for="grade">Grade:</label>
             <select name="grade" required>
               <option value="">--</option>
