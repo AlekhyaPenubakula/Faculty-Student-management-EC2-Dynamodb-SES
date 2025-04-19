@@ -111,7 +111,6 @@
   </style>
 </head>
 <body>
-
   <!-- Navbar -->
   <nav>
     <div class="nav-logo">CloudClass</div>
@@ -136,8 +135,9 @@
       <h3>Project Submissions</h3>
       {% if submissions %}
         <ul>
-          {% for submission in submissions %}
-            <li>{{ submission.student }} submitted <strong>{{ submission.filename }}</strong> for <em>{{ submission.course }}</em></li>
+          {% for s in submissions %}
+            <li><strong>{{ s.student }}</strong> submitted 
+              <strong>{{ s.filename }}</strong> for <em>{{ s.course }}</em></li>
           {% endfor %}
         </ul>
       {% else %}
@@ -151,7 +151,8 @@
       {% if evaluations %}
         <ul>
           {% for eval in evaluations %}
-            <li>{{ eval.student }} — {{ eval.course }}: Grade <strong>{{ eval.grade }}</strong></li>
+            <li><strong>{{ eval.student }}</strong> — 
+              {{ eval.course }}: Grade <strong>{{ eval.grade }}</strong></li>
           {% endfor %}
         </ul>
       {% else %}
@@ -174,6 +175,6 @@
   <footer>
     &copy; 2025 CloudClass. Supporting Excellence in Teaching.
   </footer>
-
 </body>
+
 </html>
