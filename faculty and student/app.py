@@ -277,47 +277,51 @@ def evaluate():
     if 'user' not in session or session['user']['role'] != 'faculty':
         return redirect(url_for('login'))
 
+    # Fetch all activity records from DynamoDB
+    all_items = activities_table.scan().get('Items', [])
+
+    # Identify submissions that have already been graded
+    graded_keys = {
+        (item['user_email'], item['course_name'])
+        for item in all_items
+        if item.get('activity_type_id', '').startswith('grade#')
+    }
+
+    # Get only project submissions that are not yet graded
+    ungraded_submissions = [
+        item for item in all_items
+        if item.get('activity_type_id', '').startswith('project#') and
+           (item['user_email'], item['course_name']) not in graded_keys
+    ]
+
+    # Handle form submission to grade a project
     if request.method == 'POST':
         student = request.form['student']
         course = request.form['course']
         grade = request.form['grade']
+        now = str(datetime.now(timezone.utc))
 
-        # Store grade
+        # Save grade
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
             'course_name': course,
             'grade': grade,
-            'timestamp': str(datetime.now(timezone.utc))
+            'timestamp': now
         })
 
-        # Add notification
+        # Send notification
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
             'message': f"Grade received for {course}: {grade}",
-            'timestamp': str(datetime.now(timezone.utc))
+            'timestamp': now
         })
 
         return redirect(url_for('evaluate'))
 
-    # === FETCHING LOGIC ===
-    all_items = activities_table.scan().get('Items', [])
-
-    # Get all project submissions
-    submissions = [item for item in all_items if item.get('activity_type_id', '').startswith('project#')]
-
-    # Get all evaluations
-    evaluations = {item['user_email'] + '#' + item['course_name']: item for item in all_items if item.get('activity_type_id', '').startswith('grade#')}
-
-    # Filter submissions: show only those that haven't been graded yet
-    ungraded_submissions = []
-    for submission in submissions:
-        key = submission['user_email'] + '#' + submission['course_name']
-        if key not in evaluations:
-            ungraded_submissions.append(submission)
-
     return render_template('evaluate.html', submissions=ungraded_submissions)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
