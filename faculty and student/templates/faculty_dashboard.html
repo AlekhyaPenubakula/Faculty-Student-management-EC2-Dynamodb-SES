@@ -131,19 +131,29 @@
   <section class="dashboard-grid">
 
     <!-- Project Submissions -->
-    <div class="card">
-      <h3>Project Submissions</h3>
-      {% if submissions %}
-        <ul>
-          {% for s in submissions %}
-            <li><strong>{{ s.student }}</strong> submitted 
-              <strong>{{ s.filename }}</strong> for <em>{{ s.course }}</em></li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>No submissions yet.</p>
-      {% endif %}
-    </div>
+<div class="card">
+  <h3>Project Submissions</h3>
+  {% if submissions %}
+    <ul>
+      {% for s in submissions %}
+        <li>
+          <strong>{{ s.student }}</strong> submitted 
+          <span style="word-break: break-word;">
+            {% if 'http' in s.filename %}
+              <a href="{{ s.filename }}" target="_blank">{{ s.filename }}</a>
+            {% else %}
+              <strong>{{ s.filename }}</strong>
+            {% endif %}
+          </span> 
+          for <em>{{ s.course }}</em>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No submissions yet.</p>
+  {% endif %}
+</div>
+
 
     <!-- Evaluations -->
     <div class="card">
