@@ -283,23 +283,25 @@ def evaluate():
 
     all_items = activities_table.scan().get('Items', [])
 
+    # Get graded student-course pairs
     graded_set = {
-    (item['user_email'], item.get('course_name'))
-    for item in all_items
-    if item.get('activity_type_id', '').startswith('grade#')
-}
-
-    ungraded_submissions = [
-    {
-        'user_email': item['user_email'],
-        'course_name': item.get('course_name', ''),
-        'filename': item.get('filename', '')
+        (item['user_email'], item['course_name'])
+        for item in all_items
+        if item.get('activity_type_id', '').startswith('grade#')
     }
-    for item in all_items
-    if item.get('activity_type_id', '').startswith('project#')
-    and item.get('filename')  # Ensure filename exists
-    and (item['user_email'], item.get('course_name')) not in graded_set
-    ]
+
+    # Get ungraded submissions
+    ungraded_submissions = []
+    for item in all_items:
+        if item.get('activity_type_id', '').startswith('project#'):
+            student = item['user_email']
+            course = item.get('course_name')
+            if (student, course) not in graded_set:
+                ungraded_submissions.append({
+                    'user_email': student,
+                    'course_name': course,
+                    'filename': item.get('filename', '')
+                })
 
     if request.method == 'POST':
         student = request.form['student']
@@ -307,6 +309,7 @@ def evaluate():
         grade = request.form['grade']
         now = str(datetime.now(timezone.utc))
 
+        # Save grade
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'grade#{course}',
@@ -315,6 +318,7 @@ def evaluate():
             'timestamp': now
         })
 
+        # Save note
         activities_table.put_item(Item={
             'user_email': student,
             'activity_type_id': f'note#{uuid.uuid4()}',
@@ -325,6 +329,7 @@ def evaluate():
         return redirect(url_for('evaluate'))
 
     return render_template('evaluate.html', submissions=ungraded_submissions)
+
 
 
 if __name__ == '__main__':
