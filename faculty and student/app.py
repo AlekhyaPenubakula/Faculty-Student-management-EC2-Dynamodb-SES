@@ -8,7 +8,7 @@ dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')
 users_table = dynamodb.Table('Faculty-Student-Users')
 courses_table = dynamodb.Table('Courses')
 activities_table = dynamodb.Table('Activities')
-sns = boto3.client('sns', region_name='ap-south-1')
+
 
 app = Flask(__name__)
 app.secret_key = 'cloudclass_secret'
